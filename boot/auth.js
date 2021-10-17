@@ -4,7 +4,8 @@
 var passport = require('passport');
 var Strategy = require('passport-local');
 var crypto = require('crypto');
-var db = require('../db');
+var { v4: uuidv4 } = require('uuid');
+var db = require('../src/db');
 
 
 module.exports = function () {
@@ -15,37 +16,41 @@ module.exports = function () {
   // (`username` and `password`) submitted by the user.  The function must verify
   // that the password is correct and then invoke `cb` with a user object, which
   // will be set at `req.user` in route handlers after authentication.
-  passport.use(new Strategy(async function (username, password, cb) {
-    try {
-      const { resources: rows } = await db.User.items
-        .query(`SELECT * FROM c WHERE c.name = '${username}'`)
-        .fetchAll();
-      if (!rows || !rows[0]) { return cb(null, false, { message: 'Incorrect username or password.' }); }
-      var salt = Buffer.from(JSON.parse(rows[0].salt));
+  passport.use(new Strategy({},
+    async function (username, password, cb) {
+      try {
+        const { resources: rows } = await db.User.items
+          .query({
+            query: 'SELECT single * FROM c WHERE c.username = @username ',
+            parameters: [{ name: "@username", value: username }]
+          })
+          .fetchAll();
+        if (!rows || !rows[0]) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+        var salt = Buffer.from(JSON.parse(rows[0].salt));
 
-      crypto.pbkdf2(password, salt, 310000, 32, 'sha256', function (err, hashedPassword) {
-        if (err) { return cb(err); }
-        try {
-          var password = Buffer.from(JSON.parse(rows[0].password));
-          if (!crypto.timingSafeEqual(password, hashedPassword)) {
-            return cb(null, false, { message: 'Incorrect username or password.' });
+        crypto.pbkdf2(password, salt, 310000, 32, 'sha256', function (err, hashedPassword) {
+          if (err) { return cb(err); }
+          try {
+            var password = Buffer.from(JSON.parse(rows[0].password));
+            if (!crypto.timingSafeEqual(password, hashedPassword)) {
+              return cb(null, false, { message: 'Incorrect username or password.' });
+            }
+            var user = {
+              id: rows[0].id,
+              username: rows[0].username,
+              displayName: rows[0].displayName
+            };
+            return cb(null, user);
+          } catch (err) {
+            return cb(null, false, { message: err.message });
           }
-          var user = {
-            id: rows[0].id,
-            name: rows[0].name,
-            displayName: rows[0].displayName
-          };
-          return cb(null, user);
-        } catch (err) {
-          return cb(null, false, { message: err.message });
-        }
-      });
+        });
 
-    } catch (err) {
-      { return cb(err); }
-    }
+      } catch (err) {
+        { return cb(null, false, err.message); }
+      }
 
-  }));
+    }));
 
 
   // Configure Passport authenticated session persistence.

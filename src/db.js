@@ -17,7 +17,5 @@
  
  module.exports = {
      User: database.container('user'),
-     Score: database.container('score'),
-     History: database.container('history'),
-     Dictionary: database.container('dictionary'),
+     Protocol: database.container('protocol'),
  }

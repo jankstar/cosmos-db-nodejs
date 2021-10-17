@@ -1,0 +1,247 @@
+<!--me.html-->
+<!DOCTYPE html>
+<html id="me">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<head>
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.min.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+
+  <div id="q-app" class="q-pa-md">
+
+    <q-layout view="hHh lpR fFf" container style="height: 1024px" class="shadow-2 rounded-borders">
+
+      <!-- header / toolbar -->
+      <q-header elevated class="bg-blue">
+        <q-toolbar inset>
+
+          <q-toolbar-title>
+            <strong>{{title}}</strong>
+          </q-toolbar-title>
+
+          <!--q-btn type="a" href="/private/dashboard" icon="show_chart">Dashboard</q-btn>
+          <q-btn type="a" href="/private/main" icon="table_view">Search & Edit</q-btn>
+          <q-btn type="a" href="/private/tables" icon="table_rows">Tables</q-btn>
+          <q-space></q-space-->
+
+          <q-chip>
+            <q-avatar>
+              <q-img v-bind:src="me.avatar">
+            </q-avatar>
+            {{ me.name }}
+          </q-chip>
+
+          <q-btn type="a" href="/private/me" outline disable :icon="'assignment_ind'"></q-btn>
+          <q-btn type="a" href="/logout" :icon="'logout'"></q-btn>
+        </q-toolbar>
+      </q-header>
+
+      <q-page-container>
+        <q-page class="q-pa-md">
+
+
+          <q-form method="POST" action="/private/me">
+
+            <q-field label="Name" stack-label name="uname">
+              <template v-slot:control>
+                <div class="self-center full-width no-outline" tabindex="0">{{ me.name }}</div>
+              </template>
+            </q-field>
+            <q-field  label="Rolle" stack-label name="role"></q-select>
+              <template v-slot:control>
+                <div class="self-center full-width no-outline" tabindex="0">{{ me.role }}</div>
+              </template>
+            </q-field>
+
+            <q-select outlined v-model="avatar" :options="avatarlist" label="Avatar" name="avatar"
+              virtual-scroll-slice-size="5" :option-label="['avatar']" :option-value="['avatar']">
+              <template v-slot:before>
+                <q-avatar>
+                  <q-img v-bind:src="avatar.avatar">
+                </q-avatar>
+              </template>
+
+              <template v-slot:option="scope">
+                <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
+                  <q-item-section avatar>
+                    <q-img v-bind:src="scope.opt.avatar" />
+                  </q-item-section>
+                  <q-item-section>
+                    <q-item-label v-html="scope.opt.value" />
+                  </q-item-section>
+                </q-item>
+              </template>
+
+
+            </q-select>
+
+            <q-separator spaced inset></q-separator>
+            <div>
+              <q-btn label="Sichern" type="submit" color="primary"></q-btn>
+              <q-btn label="Ändern Passwort" color="primary" @click="onChangePwd('start')"></q-btn>
+            </div>
+          </q-form>
+
+          <q-dialog v-model="pwd" persistent>
+            <q-card style="min-width: 350px">
+              <q-card-section>
+                <div class="text-h6">Ändern Passwort</div>
+              </q-card-section>
+      
+              <q-card-section class="q-pt-none">
+                <q-input dense v-model="password_old"  type="password" label="altes Passwort" autofocus ></q-input>
+                <q-input dense v-model="password_new"  type="password" label="neues Passwort" ></q-input>
+                <q-input dense v-model="password_new2" type="password" label="neues Passwort bestätigt" ></q-input>
+              </q-card-section>
+      
+              <q-card-actions align="right" class="text-primary">
+                <q-btn flat label="Abbruch" @click="onChangePwd('cancel')" ></q-btn>
+                <q-btn flat label="Sichern" @click="onChangePwd('save')" ></q-btn>
+              </q-card-actions>
+            </q-card>
+          </q-dialog>
+
+        </q-page>
+      </q-page-container>
+
+    </q-layout>
+
+  </div>
+  <!-- Add the following at the end of your body tag -->
+
+  <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/lang/de.umd.min.js"></script>
+
+  <script>
+    Quasar.lang.set(Quasar.lang.de)
+
+    /*
+      Example kicking off the UI. Obviously, adapt this to your specific needs.
+      Assumes you have a <div id="q-app"></div> in your <body> above
+     */
+    vue = new Vue({
+      el: '#q-app',
+      data: function () {
+        return {
+          title: "'<%- title %>'",
+          avatar: { "avatar": '' },
+          me: '<%- me %>',
+          pwd: "'<%- pwd %>'",
+          avatarlist: '<%- avatarlist %>',
+          password_old: "",
+          password_new: "",
+          password_new2: "",
+        }
+      },
+      
+      created() {
+        this.me.avatar = "/static/avatare/"+this.me.avatar;
+        this.avatar.avatar = this.me.avatar;
+      },
+
+      methods: {
+
+        onChangePwd(iButton) {
+          if (iButton == 'start') {
+            this.pwd = true;
+            return;
+          }
+          if (iButton != 'save') {
+            if (this.me.password == "") {
+              //password must change
+              this.$q.notify({
+                message: 'Achtung: aktelles Password muss eingegeben werden.', 
+                color: 'negative',
+                icon: 'warning'
+              });              
+            } else {
+              //clode window
+              this.pwd = false;  
+            }
+          } else {
+          //check validation
+            if (this.password_new == "") {
+              this.$q.notify({
+                message: 'Achtung: neues Passwort muss angegeben werden.', 
+                color: 'negative',
+                icon: 'warning'
+                }); 
+                return;
+            }
+            if (this.password_new2 == "") {
+            this.$q.notify({
+                message: 'Achtung: Passwort muss bestätigt werden.', 
+                color: 'negative',
+                icon: 'warning'
+              }); 
+              return;
+            }
+            if (this.password_new != this.password_new2) {
+            this.$q.notify({
+                message: 'Achtung: das neue Passwort und die Bestätigung müssen identisch sein.', 
+                color: 'negative',
+                icon: 'warning'
+              }); 
+              return;
+            }          
+          
+            me = this;
+            var myURL = window.origin + "/private/changepwd";
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open("POST", myURL, false); //synchrone 
+            xmlHttp.setRequestHeader("Content-Type", "application/json");
+            xmlHttp.onreadystatechange = function () {
+
+              if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+                var lData  = ""
+                var json = JSON.parse(xmlHttp.responseText);
+                console.log(json);
+                if (json.data) {
+                  lData = "  " + json.data;
+                }
+                me.pwd = false; //close passwd dialog
+                me.$q.notify({
+                  message: 'OK:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText + lData,
+                  color: 'positive',
+                  icon: 'announcement'
+                });   
+                me.password_new = me.password_new2 = me.password_old = "";             
+              
+              } else {
+                var lData  = ""
+                var json = JSON.parse(xmlHttp.responseText);
+                console.log(json);
+                if (json.data) {
+                  lData = "  " + json.data;
+                }
+                me.$q.notify({
+                  message: 'Fehler beim Ändern der Daten:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText + lData,
+                  color: 'negative',
+                  icon: 'warning'
+                });
+                me.password_new = me.password_new2 = me.password_old = "";
+              }
+            };
+
+            xmlHttp.send(JSON.stringify({
+              "password_old": this.password_old,
+              "password_new": this.password_new,
+              "password_new2": this.password_new2,
+            }));          
+          
+          } 
+        },
+
+      },
+      // ...etc
+    })
+  </script>
+</body>
+
+</html>

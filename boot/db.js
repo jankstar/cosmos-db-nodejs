@@ -1,7 +1,7 @@
 /**
  * Modul - boot sequence for DB
  */
-var db = require('../db');
+var db = require('../src/db');
 
 module.exports = async function () {
   const { resources: rows } = await db.User.items

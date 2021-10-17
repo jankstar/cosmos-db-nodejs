@@ -1,0 +1,98 @@
+<!--error.html-->
+<!DOCTYPE html>
+<html id="error">
+  <!--
+    WARNING! Make sure that you match all Quasar related
+    tags to the same version! (Below it's "@1.12.8")
+  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <head>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.min.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+    
+    <div id="q-app">
+
+      <div class="q-gutter-md" >
+        <q-responsive :ratio="1" class="col" >
+        <q-layout view="lHh lpr lFf" reveal="true"
+          container class="shadow-2 rounded-borders">
+            <q-header elevated class="bg-blue">
+              <q-toolbar inset>
+                <q-toolbar-title>
+                  <strong>{{title}}</strong>
+                </q-toolbar-title>
+
+                <q-btn type="a" href="/" :icon="'home'"></q-btn>
+
+              </q-toolbar>
+            </q-header>
+
+            <q-page-container>
+
+      <div class="q-pa-md row justify-center">
+        <div style="width: 100%; max-width: 400px">
+          <q-chat-message
+            name="admin"
+            avatar="/static/avatare/avatar4.png"
+            v-bind:stamp="chattime"
+            v-bind:text="chattext"
+            sent
+          >
+          </q-chat-message>
+
+        </div>
+      </div>
+    </q-page-container> 
+
+  </q-layout>
+  </q-responsive>
+</div>
+</div>
+
+    <!-- Add the following at the end of your body tag -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/lang/de.umd.min.js"></script>
+    
+    <script>
+      Quasar.lang.set(Quasar.lang.de)
+
+      /*
+        Example kicking off the UI. Obviously, adapt this to your specific needs.
+        Assumes you have a <div id="q-app"></div> in your <body> above
+       */
+      new Vue({
+        el: '#q-app',
+        data: function () {
+          return {
+            title: "'<%- title %>'",
+            chattext: ["'<%- type %>': '<%- message %>'"],
+            chattime: "'<%- time %>'",
+          }
+        },
+        created() {
+          function get_cookie(name){
+            return document.cookie.split(';').some(c => {
+            return c.trim().startsWith(name + '=');
+            });
+          }
+
+          if( get_cookie( "COSMOS_DB" ) ) {
+            document.cookie = "COSMOS_DB" + "=" +
+            (("/") ? ";path="+"/":"")+
+            ((window.location.hostname)?";domain="+window.location.hostname:"") +
+            ";expires=Thu, 01 Jan 1970 00:00:01 GMT";
+          }
+        },
+        methods: {},
+        // ...etc
+      })
+    </script>
+  </body>
+</html>

@@ -1,8 +1,6 @@
 /.env
 /node_modules
 /package-lock.json
-/upload
-
-/client/img/cats/*.jpeg
-/static
+/data
+/.DS_Store
 launch.json

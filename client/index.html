@@ -1,0 +1,109 @@
+<!--index.html-->
+<!DOCTYPE html>
+<html id="index">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <head>
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.prod.css" rel="stylesheet" type="text/css">
+  </head>
+
+  <body>
+    <div id="q-app" class="q-pa-md">
+      <div class="q-gutter-md" >
+        <q-responsive :ratio="1" class="col" >
+        <q-layout view="lHh lpr lFf" reveal="true"
+          container class="shadow-2 rounded-borders">
+            <q-header elevated class="bg-blue">
+              <q-toolbar inset>
+                <q-toolbar-title>
+                  <strong>{{title}}</strong>
+                </q-toolbar-title>
+
+              </q-toolbar>
+            </q-header>
+
+            <q-page-container>
+              <q-page class="q-pa-md">
+
+                <q-form method="POST" action="/login">
+                  <q-input type="text" label="Name" placeholder="Name zur Anzeige" name="username" 
+                    v-model="username"  required>
+                  </q-input>
+                  <!--q-input v-model="email" filled type="email" placeholder="EMail" name="email">
+                  </q-input-->
+                  <q-separator spaced inset ></q-separator>  
+                  <q-input type="password" label="Passwort" placeholder="Passwort" name="password" 
+                    v-model="password"  required>
+                  </q-input>
+                  <q-separator spaced inset ></q-separator> 
+                  <q-btn type="submit" :disable="!isValid" color="primary">Login</q-btn>
+                </q-form>
+
+              </q-page>
+            </q-page-container> 
+
+        </q-layout>
+        </q-responsive>
+      </div>
+    </div>
+
+    <!-- Add the following at the end of your body tag -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.umd.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/lang/de.umd.prod.js"></script>
+    
+    <script>
+      Quasar.lang.set(Quasar.lang.de)
+
+      /*
+        Example kicking off the UI. Obviously, adapt this to your specific needs.
+        Assumes you have a <div id="q-app"></div> in your <body> above
+       */
+       const app = Vue.createApp({
+        el: '#q-app',
+        //
+        data: function () {
+          return {
+            //hier die Daten des template
+            loading: false,
+            username: "",
+            password: "",
+            email: "",
+
+            //hier die Daten vom Server
+            title: "'<%= title %>'",
+            messages: "'<%= message %>'", 
+            }
+        },
+        computed: {
+          isValid() {
+            return this.username.length >= 1 && this.password.length >= 1
+          }
+        },
+        //
+        created() {
+          if (this.messages) {
+            this.$q.notify({
+              message: 'Error:' + this.messages,
+              color: 'negative',
+              icon: 'error',
+            });
+          }
+        },
+        //
+        methods: {
+
+        },
+        // ...etc
+      })
+
+      app.use(Quasar)
+      Quasar.lang.set(Quasar.lang.de)
+      app.mount('#q-app')      
+    </script>
+  </body>
+</html>
