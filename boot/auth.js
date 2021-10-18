@@ -4,7 +4,6 @@
 var passport = require('passport');
 var Strategy = require('passport-local');
 var crypto = require('crypto');
-var { v4: uuidv4 } = require('uuid');
 var db = require('../src/db');
 
 
@@ -21,7 +20,7 @@ module.exports = function () {
       try {
         const { resources: rows } = await db.User.items
           .query({
-            query: 'SELECT single * FROM c WHERE c.username = @username ',
+            query: 'SELECT * FROM c WHERE c.username = @username ',
             parameters: [{ name: "@username", value: username }]
           })
           .fetchAll();
