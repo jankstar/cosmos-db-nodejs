@@ -9,20 +9,22 @@
 
 <head>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet"
-    type="text/css">
-  <link href="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.min.css" rel="stylesheet" type="text/css">
-</head>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://cdn.jsdelivr.net/npm/quasar@2.1.5/dist/quasar.prod.css" rel="stylesheet" type="text/css">
+  </head>
 
 <!-- Notice lang="sass" -->
 <style lang="sass">
   .q-pa-xs {
     padding: 1px 1px;
   }
+
   .q-checkbox__inner {
     font-size: 25px;
   }
-  .q-table tbody td, .q-table thead tr {
+
+  .q-table tbody td,
+  .q-table thead tr {
     height: 32px;
     padding: 3px 8px;
   }
@@ -31,7 +33,7 @@
 <body>
   <div id="q-app" class="q-pa-md">
 
-    <q-layout view="hHh lpR fFf" container style="height: 1024px" class="shadow-2 rounded-borders">
+    <q-layout view="hHh lpR fFf" container style="height: 900px" class="shadow-2 rounded-borders">
 
       <!-- header / toolbar -->
       <q-header class="bg-blue">
@@ -47,7 +49,7 @@
             <q-avatar>
               <q-img v-bind:src="me.avatar">
             </q-avatar>
-            {{ me.name }}
+            {{ me.username }}
           </q-chip>
 
           <q-btn type="a" href="/private/me" :icon="'assignment_ind'"></q-btn>
@@ -62,11 +64,11 @@
           <div class="row">
             <q-space></q-space>
             <q-select flat dense v-model="table_field" hint="table" outlined flat :options="cat_table_field"
-              class="q-ml-sm" @input="onSearch()">
+              class="q-ml-sm" @update:model-value ="onSearch()">
             </q-select>
 
-            <q-input flat dense v-model="search" hint="field:value - Example 'status:200'" style="min-width: 50%;" outlined flat clearable
-              class="q-ml-sm">
+            <q-input flat dense v-model="search" hint="field:value - Example 'username:admin'" style="min-width: 50%;"
+              outlined flat clearable class="q-ml-sm">
               <template v-slot:after>
                 <q-btn flat @click="onSearch()" icon="search" color="primary"></q-btn>
               </template>
@@ -76,24 +78,27 @@
             </q-input>
           </div>
 
-          <template>
+          <div>
 
             <!-- Tablle für 0 - Tabelle -->
-            <q-table style="height: 850px;" title="Data" :data="data" row-key="index"
+            <q-table style="height: 740px;" title="Data" :rows="data" row-key="id"
               no-data-label="I didn't find anything" :separator="separator" :loading="loading" :filter="filter"
-              selection="single" :selected.sync="selected" virtual-scroll :rows-per-page-options="[0]">
+              selection="single" v-model:selected="selected" virtual-scroll :rows-per-page-options="[0]">
               <template v-slot:top-left>
                 <q-text>Data</q-text>
-                <q-btn icon="read_more" flat round dense
-                  @click="onDetail();" class="q-ml-sm" color="primary"><q-tooltip>Detail Element</q-tooltip></q-btn>    
-                <q-btn icon="playlist_add" flat round dense
-                  @click="onNew();" class="q-ml-sm" color="primary"><q-tooltip>New Element</q-tooltip></q-btn> 
-                <q-btn icon="delete" flat round dense
-                  @click="onDelete();" class="q-ml-sm" color="primary"><q-tooltip>Delete Element</q-tooltip></q-btn>                                                    
+                <q-btn icon="read_more" flat round dense @click="onDetail();" class="q-ml-sm" color="primary">
+                  <q-tooltip>Detail Element</q-tooltip>
+                </q-btn>
+                <q-btn icon="playlist_add" flat round dense @click="onNew();" class="q-ml-sm" color="primary">
+                  <q-tooltip>New Element</q-tooltip>
+                </q-btn>
+                <q-btn icon="delete" flat round dense @click="onDelete();" class="q-ml-sm" color="primary">
+                  <q-tooltip>Delete Element</q-tooltip>
+                </q-btn>
               </template>
 
               <template v-slot:top-right="props">
-                
+
                 <q-input dense debounce="300" v-model="filter" placeholder="Filter" outlined clearable flat
                   class="q-ml-sm">
                   <template v-slot:append>
@@ -114,20 +119,22 @@
               </template>
             </q-table>
 
-          </template>
+          </div>
 
           <!-- subdialog upload-->
-          <q-dialog v-model="dialogFTP" persistent >
-            <q-card style="min-width: 500px; height: 550px;">
+          <q-dialog v-model="dialogUser" persistent>
+            <q-card style="min-width: 500px; height: 620px;">
               <q-card-section>
-                <div class="text-h6">FTP Data</div>
+                <div class="text-h6">User Data</div>
                 <div class="q-gutter-md col items-start">
-                  <q-input v-model="ftpData.id" label="id" readonly></q-input>
-                  <q-input v-model="ftpData.host" label="host" ></q-input>
-                  <q-input v-model="ftpData.user" label="user" ></q-input>
-                  <q-input v-model="ftpData.password" label="password" type="password" ></q-input>
-                  <q-input v-model="ftpData.dir" label="dir" ></q-input>
-                  <q-input v-model="ftpData.filter" label="filter" ></q-input>
+                  <q-input v-if="userData.id != ''" v-model="userData.username" label="username" readonly></q-input>
+                  <q-input v-if="userData.id == ''" v-model="userData.username" label="username" ></q-input>
+                  <q-input v-model="userData.avatar" label="avatar"></q-input>
+                  <q-input v-model="userData.role" label="role"></q-input>
+                  <q-input v-if="userData.id != ''" v-model="userData.password" label="password" readonly></q-input>
+                  <q-input v-model="userData.lastLogin" label="lastLogin" readonly></q-input>
+                  <q-input v-model="userData.newPassword" label="New Password" type="password"></q-input>
+                  <q-input v-model="userData.valNewPassword" label="Validation" type="password"></q-input>
                 </div>
               </q-card-section>
               <q-card-actions align="right" class="text-primary">
@@ -135,28 +142,7 @@
                   <q-spinner-hourglass color="primary" size="2em"></q-spinner-hourglass>
                 </div>
                 <q-space></q-space>
-                <q-btn label="Save" @click="onSave('ftp_data')" color="primary"></q-btn>
-                <q-btn label="Cancel" v-close-popup color="primary"></q-btn>
-              </q-card-actions>
-            </q-card>
-          </q-dialog>
-
-          <q-dialog v-model="dialogMail" persistent >
-            <q-card style="min-width: 500px; height: 330px;">
-              <q-card-section>
-                <div class="text-h6">Mail Data</div>
-                <div class="q-gutter-md col items-start">
-                  <q-input v-model="mailData.id" label="id" readonly></q-input>
-                  <q-input v-model="mailData.email" label="email" type="email"></q-input>
-                  <q-input v-model="mailData.box" label="box" ></q-input>
-                </div>
-              </q-card-section>
-              <q-card-actions align="right" class="text-primary">
-                <div v-show="idle">
-                  <q-spinner-hourglass color="primary" size="2em"></q-spinner-hourglass>
-                </div>
-                <q-space></q-space>
-                <q-btn label="Save" @click="onSave('mail_data')" color="primary"></q-btn>
+                <q-btn label="Save" @click="onSave('user')" color="primary"></q-btn>
                 <q-btn label="Cancel" v-close-popup color="primary"></q-btn>
               </q-card-actions>
             </q-card>
@@ -174,9 +160,9 @@
 
   <!-- Add the following at the end of your body tag -->
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/lang/de.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.umd.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/lang/de.umd.prod.js"></script>
 
   <script>
     Quasar.lang.set(Quasar.lang.de)
@@ -205,41 +191,35 @@
       Example kicking off the UI. Obviously, adapt this to your specific needs.
       Assumes you have a <div id="q-app"></div> in your <body> above
      */
-    vue = new Vue({
-      el: '#q-app',
+     const app = Vue.createApp({
+        el: '#q-app',
       //hier sind die Daten des Views
       data: function () {
         return {
           loading: false,
           toggle: "0",
-          dialogPDF: false,
           filter: "",
           search: "*",
           table_field: "user",
           cat_table_field: ["user", "protocol"],
           maxline: "50",
           selected: [],
-          category: [],
           status: [],
           separator: "cell",
           pagination: { rowsPerPage: 0 },
           me: {},
           data: [],
-          dialogFTP: false,
-          ftpData: {
-            "id": 0,
-            "host": "",
-            "user": "",
+          dialogUser: false,
+          userData: {
+            "id": "",
+            "username": "",
+            "salt": "",
             "password": "",
-            "dir": "",
-            "filter": "",
-          },
-          dialogMail: false,
-          mailData: {
-            "id": 0,
-            "email": "",
-            "box": "",
-            "token": {},
+            "avatar": "",
+            "role": "",
+            "lastLogin": "",
+            "newPassword": "",
+            "valNewPassword": "",
           },
           idle: false,
 
@@ -249,15 +229,14 @@
       },
 
       computed: {
-        isValid() {
-          return this.name.length <= 10
-        }
       },
 
       //
 
       created() {
-        this.getDataFromApi("user", "?json=true", "me")
+
+        this.getDataFromApi("me", "?json=true", "me");
+
         if (this.search == "") {
           this.search = "*";
         };
@@ -271,10 +250,6 @@
       },
       //
       methods: {
-        changeValue(val, done) {
-          this.onSearch();
-          done(val);
-        },
 
         //Daten vom Server async holen
         getDataFromApi(iPath, iQuery, cData) {
@@ -289,15 +264,19 @@
 
                 me[cData] = JSON.parse(xmlHttp.responseText)["data"];
 
+                if (iPath == 'me') {
+                  me.me.avatar = me.me.avatar || '/static/avatare/avatar1.png';
+                }
+
                 //Index generieren
-                if (me[cData] != null && "forEach" in me[cData] ) {
+                if (me[cData] != null && "forEach" in me[cData]) {
                   me[cData].forEach((row, index) => {
-                    row.index = index
+                    //row.index = index
                     //row.amount = row.amount ? row.amount : 0.0
 
                     if (me.selected[0] && me.selected[0].length != 0 && me.selected[0].id == row.id) {
                       //selektierte Werte übernehmen
-                      //me.selected[0] = row;
+                      me.selected[0] = row;
                     }
 
                   })
@@ -357,7 +336,7 @@
               });
             }
           };
-          
+
           xmlHttp.send(iData);
           console.log("gesichert")
           this.idle = false;
@@ -377,59 +356,43 @@
             return;
           }
 
-          if (this.table_field == "ftp_data") {
-            //table is ftp_data
-            this.ftpData = this.selected[0];
-            this.dialogFTP = true;
+          if (this.table_field == "user") {
+            //table is user
+            this.userData = this.selected[0];
+            this.dialogUser = true;
             return;
           }
 
-          if (this.table_field == "mail_data") {
-            //table is mail_data
-            this.mailData = this.selected[0];
-            this.dialogMail = true;
-            return;
-          }
-
-          me.$q.notify({
-                message: 'Funktion "Detail" hier nicht unterstützt.',
-                color: 'negative',
-                icon: 'warning'
-              });          
+          this.$q.notify({
+            message: 'Funktion "Detail" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
         },
 
         onNew() {
-          if (this.table_field == "ftp_data") {
+          if (this.table_field == "user") {
             //table is ftp_data
-            this.ftpData = {
-              "id": 0,
-              "host": "",
-              "user": "",
+            this.userData = {
+              "id": "",
+              "username": "",
               "password": "",
-              "dir": "",
-              "filter": "",
+              "salt": "",
+              "avatar": "",
+              "role": "",
+              "lastLogin": "",
+              "newPassword": "",
+              "valNewPassword": "",
             };
-            this.dialogFTP = true;
+            this.dialogUser = true;
             return;
           }
 
-          if (this.table_field == "mail_data") {
-            //table is mail_data
-            this.mailData = {
-              "id": 0,
-              "email": "",
-              "box": "INBOX",
-              "token": {},
-            };
-            this.dialogMail = true;
-            return;
-          }          
-
-          me.$q.notify({
-                message: 'Funktion "New" hier nicht unterstützt.',
-                color: 'negative',
-                icon: 'warning'
-              });          
+          this.$q.notify({
+            message: 'Funktion "New" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
         },
 
         onDelete() {
@@ -445,7 +408,7 @@
             return;
           }
 
-          if (this.table_field == "ftp_data" || this.table_field == "mail_data") {
+          if (this.table_field == "user" || this.table_field == "protocol") {
             var me = this;
             //table is ftp_data or mail_data
             this.$q.notify({
@@ -455,32 +418,33 @@
               position: 'center',
               icon: 'help_outline',
               actions: [
-                { label: 'OK', color: 'black', handler: () => { 
+                {
+                  label: 'OK', color: 'black', handler: () => {
 
-                  //OK - löschen
-                  myURL = window.origin + "/private/delete/"+ this.table_field + "/" + this.selected[0].id
-                  var xmlHttp = new XMLHttpRequest();
-                  xmlHttp.open("POST", myURL, false);
-                  xmlHttp.setRequestHeader("Content-Type", "application/json");
-                  xmlHttp.onreadystatechange = function () {
-                    if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-                      var json = JSON.parse(xmlHttp.responseText);
-                      console.log(json);
+                    //OK - löschen
+                    myURL = window.origin + "/private/delete/" + this.table_field + "/" + this.selected[0].id
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("POST", myURL, false);
+                    xmlHttp.setRequestHeader("Content-Type", "application/json");
+                    xmlHttp.onreadystatechange = function () {
+                      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+                        var json = JSON.parse(xmlHttp.responseText);
+                        console.log(json);
 
-                      me.onSearch()
+                        me.onSearch()
 
-                    } else {
+                      } else {
 
-                      me.$q.notify({
-                        message: 'Fehler beim Löschen:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
-                        color: 'negative',
-                        icon: 'warning'
-                      });
-                    }
-                  };
+                        me.$q.notify({
+                          message: 'Fehler beim Löschen:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
+                          color: 'negative',
+                          icon: 'warning'
+                        });
+                      }
+                    };
 
-                  xmlHttp.send('');                  
-                  } 
+                    xmlHttp.send('');
+                  }
                 },
                 { label: 'Cancle', color: 'black', handler: () => { /* ... */ } }
               ]
@@ -489,49 +453,46 @@
           }
 
           me.$q.notify({
-                message: 'Funktion "Delete" hier nicht unterstützt.',
-                color: 'negative',
-                icon: 'warning'
-              });          
+            message: 'Funktion "Delete" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
         },
 
         onSave(iTable) {
-          if (iTable == 'ftp_data') {
-            
-            if (this.ftpData.host == "" &&  this.ftpData.user == "" && this.ftpData.dir == "" )  {
+          if (iTable == 'user') {
+
+            if (this.userData.username == "") {
               me.$q.notify({
-                message: 'Es müssen mindestens "HOST" und "USER" oder "DIR" gefüllt werden.',
+                message: 'Es muss mindestens "Username" gefüllt werden.',
                 color: 'negative',
                 icon: 'warning'
-              });      
-            }
+              });
+              return;
 
-            this.dialogFTP = this.setDataToApi("ftp_data?",JSON.stringify(this.ftpData));
-            this.onSearch()
-            return;
+            } else if ((!this.userData.id)
+              && (!this.userData.newPassword
+                || !this.userData.valNewPassword || this.userData.newPassword != this.userData.valNewPassword)) {
+              me.$q.notify({
+                message: 'Es müssen mindestens "New Password" und "Validation" identisch gefüllt werden.',
+                color: 'negative',
+                icon: 'warning'
+              });
+              return;
+
+            } else {
+
+              this.dialogUser = this.setDataToApi("user?", JSON.stringify(this.userData));
+              this.onSearch()
+              return;
+            }
           }
 
-          if (iTable == 'mail_data') {
-            
-            if (this.mailData.email == "") {
-              me.$q.notify({
-                message: 'Es muss mindestens "email" gefüllt sein.',
-                color: 'negative',
-                icon: 'warning'
-              }); 
-              return;        
-            }
-
-            this.dialogMail = this.setDataToApi("mail_data?",JSON.stringify(this.mailData));
-            this.onSearch()
-            return;
-          }
-          
-          me.$q.notify({
-                message: 'Funktion "Save" hier nicht unterstützt.',
-                color: 'negative',
-                icon: 'warning'
-              });            
+          this.$q.notify({
+            message: 'Funktion "Save" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
         },
 
         //Suche in der Liste
@@ -545,135 +506,6 @@
           this.loading = false;
         },
 
-        //
-        stringToArray(myData, iData) {
-          if (myData[iData]) {
-            if (typeof myData[iData] == "string") {
-              myData[iData] = [myData[iData]];
-            }
-          } else {
-            myData[iData] = []
-          };
-          return myData;
-        },
-
-        //Reset Daten
-        onReset(props) {
-          this.created();
-        },
-
-        //Startet Display für Anzeige PDF
-        displayPDF() {
-          if (this.selected.length != 0 && this.selected[0]['attachment'][0]['file'] != '') {
-            this.dialogPDF = true;
-          }
-        },
-
-        //Liefert URL für PDF-Anzeige
-        getPDFURL(iName) {
-          if (iName != "") {
-            return window.origin + "/private/pdf/" + iName;
-          }
-          return ""
-        },
-
-        //Datensatz zurück
-        onLeft() {
-
-        },
-
-        //Datrensatz vor
-        onRight() {
-
-        },
-
-        //Toggle Tabelle <-> Detail
-        onToggle(props) {
-          if ((props == '1' && this.selected.length != 0 && this.selected[0].id != '') || props == '0') {
-            this.toggle = props;
-          } else {
-            this.$q.notify({
-              progress: true,
-              message: 'Bitte eine Zeile markieren.',
-              color: 'warning',
-              actions: [
-                { label: 'OK', color: 'black', handler: () => { /* ... */ } }
-              ]
-            })
-          }
-        },
-
-        //startet für Selektion doStatus auf dem Server
-        doStatus() {
-          if (this.selected.length != 0 && this.selected[0].id != '') {
-            var me = this;
-            myURL = window.origin + "/private/dostatus/" + this.selected[0].id
-
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.open("POST", myURL, false);
-            xmlHttp.setRequestHeader("Content-Type", "application/json");
-            xmlHttp.onreadystatechange = function () {
-              if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-                var json = JSON.parse(xmlHttp.responseText);
-                console.log(json);
-
-                me.onToggle('0')
-                me.onSearch()
-
-              } else {
-
-                me.$q.notify({
-                  message: 'Fehler bei der Datenverbuchung:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
-                  color: 'negative',
-                  icon: 'warning'
-                });
-              }
-            };
-
-            xmlHttp.send('');
-
-          } else {
-            this.$q.notify({
-              progress: true,
-              message: 'Bitte eine Zeile markieren.',
-              color: 'warning',
-              actions: [
-                { label: 'OK', color: 'black', handler: () => { /* ... */ } }
-              ]
-            })
-          }
-
-        },
-
-        //liefert Feldbezeichnung
-        getSelected(feld, feld2) {
-          feld = feld.replace("-", ".");
-          if (this.selected.length == 0) { return "" }
-          if (this.selected[0][feld]) {
-            if (feld2 == "") {
-              return this.selected[0][feld]
-            } else {
-              if (feld == 'attachment' && feld2 == 'file' && this.selected[0][feld].length > 1) {
-                //in der Liste soll an erster Stelle in PDF-File stehen!
-                if (!this.selected[0][feld][0][feld2].match(/\.pdf|\.PDF/)) {
-                  for (i = 1; i < this.selected[0][feld].length; ++i) {
-                    if (this.selected[0][feld][i][feld2].match(/\.pdf|\.PDF/)) {
-                      a = this.selected[0][feld][0]
-                      this.selected[0][feld][0] = this.selected[0][feld][i]
-                      this.selected[0][feld][i] = a
-                      //a = this.selected[0]["attachment.filename"][0]
-                      //this.selected[0]["attachment.filename"][0] = this.selected[0]["attachment.filename"][i]
-                      //this.selected[0]["attachment.filename"][i] = a
-                    }
-                  }
-                }
-              }
-              return this.selected[0][feld][0][feld2]
-            }
-          } else {
-            return ""
-          }
-        },
 
         //Export der Tabelle als CSV
         exportTable() {
@@ -704,7 +536,12 @@
 
       },
       // ...etc
-    })
+    });
+
+    app.use(Quasar)
+    Quasar.lang.set(Quasar.lang.de)
+    app.mount('#q-app')   
+
   </script>
 </body>
 

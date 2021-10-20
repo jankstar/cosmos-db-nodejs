@@ -11,7 +11,7 @@ var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
-var privatesRouter = require('./routes/privates');
+var privateRouter = require('./routes/private');
 const { TITLE, COOKIENAME } = require('./config.js');
 
 var app = express();
@@ -38,13 +38,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'static')));
-app.use(session({ 
-  name: COOKIENAME, 
-  secret: KEY1, 
-  resave: false, 
-  saveUninitialized: true, 
-  expires: expiryDate 
+
+app.use(session({
+  name: COOKIENAME,
+  secret: KEY1,
+  resave: false,
+  saveUninitialized: true,
+  expires: expiryDate
 }));
 app.use(function (req, res, next) {
   //move the last login messages from req to res.locals
@@ -60,6 +60,7 @@ app.use(passport.authenticate('session'));
 // Define routes.
 app.use('/', indexRouter);
 app.use('/', authRouter);
-app.use('/private', ensureLoggedIn('/'), privatesRouter);
+app.use('/static', ensureLoggedIn('/'), express.static(path.join(__dirname, 'static')));
+app.use('/private', ensureLoggedIn('/'), privateRouter);
 
 module.exports = app;

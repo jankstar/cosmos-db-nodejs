@@ -6,8 +6,9 @@
 
 <head>
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet" type="text/css">
-  <link href="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.min.css" rel="stylesheet" type="text/css">
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet"
+    type="text/css">
+  <link href="https://cdn.jsdelivr.net/npm/quasar@2.1.5/dist/quasar.prod.css" rel="stylesheet" type="text/css">
 </head>
 
 <body>
@@ -33,11 +34,11 @@
             <q-avatar>
               <q-img v-bind:src="me.avatar">
             </q-avatar>
-            {{ me.name }}
+            {{ me.username }}
           </q-chip>
 
           <q-btn type="a" href="/private/me" outline disable :icon="'assignment_ind'"></q-btn>
-          <q-btn type="a" href="/logout" :icon="'logout'"></q-btn>
+          <q-btn type="a" href="/log-out" :icon="'logout'"></q-btn>
         </q-toolbar>
       </q-header>
 
@@ -45,34 +46,35 @@
         <q-page class="q-pa-md">
 
 
-          <q-form method="POST" action="/private/me">
+          <q-form method="POST" action="/private/data/me">
 
-            <q-field label="Name" stack-label name="uname">
+            <q-field label="Username" stack-label name="username">
               <template v-slot:control>
-                <div class="self-center full-width no-outline" tabindex="0">{{ me.name }}</div>
+                <div class="self-center full-width no-outline" tabindex="0">{{ me.username }}</div>
               </template>
             </q-field>
-            <q-field  label="Rolle" stack-label name="role"></q-select>
+            <q-field label="Rolle" stack-label name="role" readonly>
+              </q-select>
               <template v-slot:control>
                 <div class="self-center full-width no-outline" tabindex="0">{{ me.role }}</div>
               </template>
             </q-field>
 
-            <q-select outlined v-model="avatar" :options="avatarlist" label="Avatar" name="avatar"
-              virtual-scroll-slice-size="5" :option-label="['avatar']" :option-value="['avatar']">
+            <q-select outlined v-model="me.avatar" :options="avatarlist" label="Avatar" name="avatar"
+              virtual-scroll-slice-size="5">
               <template v-slot:before>
                 <q-avatar>
-                  <q-img v-bind:src="avatar.avatar">
+                  <q-img v-bind:src="me.avatar">
                 </q-avatar>
               </template>
 
               <template v-slot:option="scope">
                 <q-item v-bind="scope.itemProps" v-on="scope.itemEvents">
                   <q-item-section avatar>
-                    <q-img v-bind:src="scope.opt.avatar" />
+                    <q-img v-bind:src="scope.opt" />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label v-html="scope.opt.value" />
+                    <q-item-label v-html="scope.opt" />
                   </q-item-section>
                 </q-item>
               </template>
@@ -82,7 +84,7 @@
 
             <q-separator spaced inset></q-separator>
             <div>
-              <q-btn label="Sichern" type="submit" color="primary"></q-btn>
+              <q-btn label="Sichern" color="primary" @click="setDataToApi('me',JSON.stringify(me))"></q-btn>
               <q-btn label="Ändern Passwort" color="primary" @click="onChangePwd('start')"></q-btn>
             </div>
           </q-form>
@@ -92,16 +94,16 @@
               <q-card-section>
                 <div class="text-h6">Ändern Passwort</div>
               </q-card-section>
-      
+
               <q-card-section class="q-pt-none">
-                <q-input dense v-model="password_old"  type="password" label="altes Passwort" autofocus ></q-input>
-                <q-input dense v-model="password_new"  type="password" label="neues Passwort" ></q-input>
-                <q-input dense v-model="password_new2" type="password" label="neues Passwort bestätigt" ></q-input>
+                <q-input dense v-model="password_old" type="password" label="altes Passwort" autofocus></q-input>
+                <q-input dense v-model="password_new" type="password" label="neues Passwort"></q-input>
+                <q-input dense v-model="password_new2" type="password" label="neues Passwort bestätigt"></q-input>
               </q-card-section>
-      
+
               <q-card-actions align="right" class="text-primary">
-                <q-btn flat label="Abbruch" @click="onChangePwd('cancel')" ></q-btn>
-                <q-btn flat label="Sichern" @click="onChangePwd('save')" ></q-btn>
+                <q-btn flat label="Abbruch" @click="onChangePwd('cancel')"></q-btn>
+                <q-btn flat label="Sichern" @click="onChangePwd('save')"></q-btn>
               </q-card-actions>
             </q-card>
           </q-dialog>
@@ -114,9 +116,9 @@
   </div>
   <!-- Add the following at the end of your body tag -->
 
-  <script src="https://cdn.jsdelivr.net/npm/vue@^2.0.0/dist/vue.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/quasar.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/quasar@1.15.20/dist/lang/de.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/quasar.umd.prod.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quasar@2.1.0/dist/lang/de.umd.prod.js"></script>
 
   <script>
     Quasar.lang.set(Quasar.lang.de)
@@ -125,27 +127,119 @@
       Example kicking off the UI. Obviously, adapt this to your specific needs.
       Assumes you have a <div id="q-app"></div> in your <body> above
      */
-    vue = new Vue({
+    const app = Vue.createApp({
       el: '#q-app',
       data: function () {
         return {
           title: "'<%- title %>'",
-          avatar: { "avatar": '' },
-          me: '<%- me %>',
-          pwd: "'<%- pwd %>'",
-          avatarlist: '<%- avatarlist %>',
+          me: {},
+          pwd: false,
+          avatarlist: [],
           password_old: "",
           password_new: "",
           password_new2: "",
         }
       },
-      
+
       created() {
-        this.me.avatar = "/static/avatare/"+this.me.avatar;
-        this.avatar.avatar = this.me.avatar;
+        this.getDataFromApi("me", "?json=true", "me");
+        this.getDataFromApi("avatare", "?json=true", "avatarlist");
       },
 
       methods: {
+
+        //Daten vom Server async holen
+        getDataFromApi(iPath, iQuery, cData) {
+          me = this;
+          //me[cData] = {}
+          var myURL = window.origin + "/private/data/" + iPath + iQuery;
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.open("GET", myURL, true);
+          xmlHttp.onload = function (e) {
+            if (xmlHttp.readyState === 4) {
+              if (xmlHttp.status === 200) {
+
+                me[cData] = JSON.parse(xmlHttp.responseText)["data"];
+
+                if (iPath == 'me') {
+                  me.pwd = (me.me.password == "");
+                  me.me.avatar = me.me.avatar || '/static/avatare/avatar1.png';
+                }
+
+                //Index generieren
+                if (me[cData] != null && "forEach" in me[cData]) {
+                  me[cData].forEach((row, index) => {
+                    row.index = index
+                    //row.amount = row.amount ? row.amount : 0.0
+
+                    //if (me.selected[0] && me.selected[0].length != 0 && me.selected[0].id == row.id) {
+                    //selektierte Werte übernehmen
+                    //me.selected[0] = row;
+                    //}
+
+                  })
+                }
+
+                //console.log(xmlHttp.responseText);
+              } else {
+                me.data = [];
+                lMessage = "";
+                lMessage = JSON.parse(xmlHttp.responseText)["data"];
+                if (lMessage == "") {
+                  lMessage = xmlHttp.statusText;
+                }
+                console.error(lMessage);
+                me.$q.notify({
+                  message: 'Anfrage fehlerhaft:' + xmlHttp.status.toString() + " : " + lMessage,
+                  color: 'negative',
+                  icon: 'warning'
+                });
+              }
+            }
+          };
+          xmlHttp.onerror = function (e) {
+            me.data = [];
+            console.error(xmlHttp.statusText);
+            me.$q.notify({
+              message: 'Anfrage fehlerhaft:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
+              color: 'negative',
+              icon: 'warning'
+            });
+          };
+
+          xmlHttp.send(null);
+        },
+
+        //Daten an den Server synch senden
+        setDataToApi(iPath, iData) {
+          this.idle = true;
+          eError = false;
+          me = this;
+          var myURL = window.origin + "/private/data/" + iPath;
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.open("POST", myURL, false);
+          xmlHttp.setRequestHeader("Content-Type", "application/json");
+          xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+              var json = JSON.parse(xmlHttp.responseText);
+              console.log(json);
+            } else {
+              var json = JSON.parse(xmlHttp.responseText);
+              console.log(json);
+              eError = true;
+              me.$q.notify({
+                message: 'Fehler bei der Datenverbuchung:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
+                color: 'negative',
+                icon: 'warning'
+              });
+            }
+          };
+
+          xmlHttp.send(iData);
+          console.log("gesichert")
+          this.idle = false;
+          return eError;
+        },
 
         onChangePwd(iButton) {
           if (iButton == 'start') {
@@ -156,50 +250,50 @@
             if (this.me.password == "") {
               //password must change
               this.$q.notify({
-                message: 'Achtung: aktelles Password muss eingegeben werden.', 
+                message: 'Achtung: aktelles Password muss eingegeben werden.',
                 color: 'negative',
                 icon: 'warning'
-              });              
+              });
             } else {
               //clode window
-              this.pwd = false;  
+              this.pwd = false;
             }
           } else {
-          //check validation
+            //check validation
             if (this.password_new == "") {
               this.$q.notify({
-                message: 'Achtung: neues Passwort muss angegeben werden.', 
+                message: 'Achtung: neues Passwort muss angegeben werden.',
                 color: 'negative',
                 icon: 'warning'
-                }); 
-                return;
+              });
+              return;
             }
             if (this.password_new2 == "") {
-            this.$q.notify({
-                message: 'Achtung: Passwort muss bestätigt werden.', 
+              this.$q.notify({
+                message: 'Achtung: Passwort muss bestätigt werden.',
                 color: 'negative',
                 icon: 'warning'
-              }); 
+              });
               return;
             }
             if (this.password_new != this.password_new2) {
-            this.$q.notify({
-                message: 'Achtung: das neue Passwort und die Bestätigung müssen identisch sein.', 
+              this.$q.notify({
+                message: 'Achtung: das neue Passwort und die Bestätigung müssen identisch sein.',
                 color: 'negative',
                 icon: 'warning'
-              }); 
+              });
               return;
-            }          
-          
+            }
+
             me = this;
-            var myURL = window.origin + "/private/changepwd";
+            var myURL = window.origin + "/private/data/me";
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.open("POST", myURL, false); //synchrone 
             xmlHttp.setRequestHeader("Content-Type", "application/json");
             xmlHttp.onreadystatechange = function () {
 
               if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-                var lData  = ""
+                var lData = ""
                 var json = JSON.parse(xmlHttp.responseText);
                 console.log(json);
                 if (json.data) {
@@ -210,11 +304,12 @@
                   message: 'OK:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText + lData,
                   color: 'positive',
                   icon: 'announcement'
-                });   
-                me.password_new = me.password_new2 = me.password_old = "";             
-              
+                });
+                me.me.password = me.password_new;
+                me.password_new = me.password_new2 = me.password_old = "";
+
               } else {
-                var lData  = ""
+                var lData = ""
                 var json = JSON.parse(xmlHttp.responseText);
                 console.log(json);
                 if (json.data) {
@@ -233,14 +328,19 @@
               "password_old": this.password_old,
               "password_new": this.password_new,
               "password_new2": this.password_new2,
-            }));          
-          
-          } 
+            }));
+
+          }
         },
 
       },
       // ...etc
-    })
+    });
+
+    app.use(Quasar)
+    Quasar.lang.set(Quasar.lang.de)
+    app.mount('#q-app')
+
   </script>
 </body>
 

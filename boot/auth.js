@@ -18,26 +18,25 @@ module.exports = function () {
   passport.use(new Strategy({},
     async function (username, password, cb) {
       try {
-        const { resources: rows } = await db.User.items
-          .query({
-            query: 'SELECT * FROM c WHERE c.username = @username ',
-            parameters: [{ name: "@username", value: username }]
-          })
-          .fetchAll();
-        if (!rows || !rows[0]) { return cb(null, false, { message: 'Incorrect username or password.' }); }
-        var salt = Buffer.from(JSON.parse(rows[0].salt));
+        const { resource: row } = await db.User.item(username, username).read();
+        //  .query(`SELECT * FROM c WHERE c.username = '${username}' `)
+        //  .fetchAll();
+        if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
+
+        var salt = Buffer.from(JSON.parse(row.salt));
 
         crypto.pbkdf2(password, salt, 310000, 32, 'sha256', function (err, hashedPassword) {
           if (err) { return cb(err); }
           try {
-            var password = Buffer.from(JSON.parse(rows[0].password));
+            var password = Buffer.from(JSON.parse(row.password));
             if (!crypto.timingSafeEqual(password, hashedPassword)) {
               return cb(null, false, { message: 'Incorrect username or password.' });
             }
             var user = {
-              id: rows[0].id,
-              username: rows[0].username,
-              displayName: rows[0].displayName
+              id: row.id,
+              username: row.username,
+              avatar: row.avatar || "",
+              role: row.role || "",
             };
             return cb(null, user);
           } catch (err) {
@@ -61,7 +60,7 @@ module.exports = function () {
   // deserializing.
   passport.serializeUser(function (user, cb) {
     process.nextTick(function () {
-      cb(null, { id: user.id, username: user.username });
+      cb(null, { id: user.id, username: user.username, avatar: user.avatar, role: user.role, });
     });
   });
 

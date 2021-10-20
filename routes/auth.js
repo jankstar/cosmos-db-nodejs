@@ -7,14 +7,14 @@ const { RateLimiterMemory } = require('rate-limiter-flexible');
 var router = express.Router();
 var db = require('../src/db');
 
-const maxWrongAttemptsByIPperDay = 5;
-const maxConsecutiveFailsByUsernameAndIP = 5;
+const maxWrongAttemptsByIPperDay = 10;
+const maxConsecutiveFailsByUsernameAndIP = 10;
 
 const limiterSlowBruteByIP = new RateLimiterMemory({
   keyPrefix: 'login_fail_ip_per_day',
   points: maxWrongAttemptsByIPperDay,
   duration: 60 * 60 * 24,
-  blockDuration: 60 * 60 * 24, // Block for 1 day, if 5 wrong attempts per day
+  blockDuration: 60 * 60 * 24, // Block for 1 day, if 10 wrong attempts per day
 });
 
 const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterMemory({
@@ -26,7 +26,9 @@ const limiterConsecutiveFailsByUsernameAndIP = new RateLimiterMemory({
 const getUsernameIPkey = (username, ip) => `${username}_${ip}`;
 
 
-
+/**
+ * router url '/login'
+ */
 router.get('/login',
   ensureLoggedOut({ redirectTo: '/private/home' }),
   function (req, res, next) {
@@ -44,7 +46,7 @@ router.post('/new', function (req, res, next) {
             "id": req.body.username,
             "username": req.body.username,
             "salt": JSON.stringify(salt),
-            "role": "newbi",
+            "role": "new",
             "avatar": "",
             "password": JSON.stringify(hashedPassword),
             "lastLogin": ""
@@ -130,7 +132,7 @@ router.post('/login',
     res.redirect('/private/home');
   });
 
-router.get('/log-out', function (req, res, next) {
+router.get('/log-out', function (req, res) {
   req.logout();
   res.redirect('/');
 });
