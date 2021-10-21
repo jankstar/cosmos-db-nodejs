@@ -12,6 +12,7 @@ var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var privateRouter = require('./routes/private');
+var adminRouter = require('./routes/admin');
 const { TITLE, COOKIENAME } = require('./config.js');
 
 var app = express();
@@ -57,10 +58,19 @@ app.use(function (req, res, next) {
 app.use(passport.initialize());
 app.use(passport.authenticate('session'));
 
+function adminCheck(req, res, next) {
+  if (req.user && req.user.role && req.user.role.includes('admin')) {
+    ensureLoggedIn('/')(req, res, next);
+  } else {
+    res.redirect('/private/home');
+  }
+}
+
 // Define routes.
 app.use('/', indexRouter);
 app.use('/', authRouter);
 app.use('/static', ensureLoggedIn('/'), express.static(path.join(__dirname, 'static')));
 app.use('/private', ensureLoggedIn('/'), privateRouter);
+app.use('/admin', adminCheck, adminRouter);
 
 module.exports = app;

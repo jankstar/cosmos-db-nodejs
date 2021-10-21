@@ -1,6 +1,6 @@
-<!--home.html-->
+<!--admin.html-->
 <!DOCTYPE html>
-<html id="home">
+<html id="admin">
 <!--
     WARNING! Make sure that you match all Quasar related
     tags to the same version! (Below it's "@1.12.8")
@@ -38,8 +38,8 @@
       <!-- header / toolbar -->
       <q-header class="bg-blue">
         <q-toolbar inset>
-          <q-btn type="a" href="/private/home" :icon="'home'"><q-tooltip>Home</q-tooltip></q-btn>
-          <q-btn type="a" href="/admin" :icon="'supervised_user_circle'"><q-tooltip>Admin</q-tooltip></q-btn>
+          <q-btn type="a" href="/private/home" :icon="'home'"></q-btn>
+          <q-btn type="a" href="/admin" :icon="'supervised_user_circle'"></q-btn>
 
           <q-toolbar-title>
             <strong>{{title}}</strong>
@@ -91,6 +91,12 @@
                 <q-btn icon="read_more" flat round dense @click="onDetail();" class="q-ml-sm" color="primary">
                   <q-tooltip>Detail Element</q-tooltip>
                 </q-btn>
+                <q-btn icon="playlist_add" flat round dense @click="onNew();" class="q-ml-sm" color="primary">
+                  <q-tooltip>New Element</q-tooltip>
+                </q-btn>
+                <q-btn icon="delete" flat round dense @click="onDelete();" class="q-ml-sm" color="primary">
+                  <q-tooltip>Delete Element</q-tooltip>
+                </q-btn>
               </template>
 
               <template v-slot:top-right="props">
@@ -119,16 +125,18 @@
 
           <!-- subdialog upload-->
           <q-dialog v-model="dialogUser" persistent>
-            <q-card style="min-width: 500px; height: 460px;">
+            <q-card style="min-width: 500px; height: 620px;">
               <q-card-section>
                 <div class="text-h6">User Data</div>
                 <div class="q-gutter-md col items-start">
                   <q-input v-if="userData.id != ''" v-model="userData.username" label="username" readonly></q-input>
-                  <q-input v-if="userData.id == ''" v-model="userData.username" label="username" readonly></q-input>
-                  <q-input v-model="userData.avatar" label="avatar" readonly></q-input>
-                  <q-input v-model="userData.role" label="role" readonly></q-input>
+                  <q-input v-if="userData.id == ''" v-model="userData.username" label="username" ></q-input>
+                  <q-input v-model="userData.avatar" label="avatar"></q-input>
+                  <q-input v-model="userData.role" label="role"></q-input>
+                  <q-input v-if="userData.id != ''" v-model="userData.password" label="password" readonly></q-input>
                   <q-input v-model="userData.lastLogin" label="lastLogin" readonly></q-input>
-                  <q-input v-model="userData.modified" label="modified at" readonly></q-input>
+                  <q-input v-model="userData.newPassword" label="New Password" type="password"></q-input>
+                  <q-input v-model="userData.valNewPassword" label="Validation" type="password"></q-input>
                 </div>
               </q-card-section>
               <q-card-actions align="right" class="text-primary">
@@ -136,6 +144,7 @@
                   <q-spinner-hourglass color="primary" size="2em"></q-spinner-hourglass>
                 </div>
                 <q-space></q-space>
+                <q-btn label="Save" @click="onSave('user')" color="primary"></q-btn>
                 <q-btn label="Cancel" v-close-popup color="primary"></q-btn>
               </q-card-actions>
             </q-card>
@@ -306,6 +315,37 @@
           xmlHttp.send(null);
         },
 
+        //Daten an den Server synch senden
+        setDataToApi(iPath, iData) {
+          this.idle = true;
+          eError = false;
+          me = this;
+          var myURL = window.origin + "/admin/data/" + iPath;
+          var xmlHttp = new XMLHttpRequest();
+          xmlHttp.open("POST", myURL, false);
+          xmlHttp.setRequestHeader("Content-Type", "application/json");
+          xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+              var json = JSON.parse(xmlHttp.responseText);
+              console.log(json);
+            } else {
+              var json = JSON.parse(xmlHttp.responseText);
+              console.log(json);
+              eError = true;
+              me.$q.notify({
+                message: 'Fehler bei der Datenverbuchung:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
+                color: 'negative',
+                icon: 'warning'
+              });
+            }
+          };
+
+          xmlHttp.send(iData);
+          console.log("gesichert")
+          this.idle = false;
+          return eError;
+        },
+
         onDetail() {
           if (this.selected.length == 0 || this.selected[0].id == '') {
             this.$q.notify({
@@ -328,6 +368,131 @@
 
           this.$q.notify({
             message: 'Funktion "Detail" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
+        },
+
+        onNew() {
+          if (this.table_field == "user") {
+            //table is ftp_data
+            this.userData = {
+              "id": "",
+              "username": "",
+              "password": "",
+              "salt": "",
+              "avatar": "",
+              "role": "",
+              "lastLogin": "",
+              "newPassword": "",
+              "valNewPassword": "",
+            };
+            this.dialogUser = true;
+            return;
+          }
+
+          this.$q.notify({
+            message: 'Funktion "New" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
+        },
+
+        onDelete() {
+          if (this.selected.length == 0 || this.selected[0].id == '') {
+            this.$q.notify({
+              progress: true,
+              message: 'Please mark one line.',
+              color: 'warning',
+              actions: [
+                { label: 'OK', color: 'black', handler: () => { /* ... */ } }
+              ]
+            });
+            return;
+          }
+
+          if (this.table_field == "user" || this.table_field == "protocol") {
+            var me = this;
+            //table is ftp_data or mail_data
+            this.$q.notify({
+              progress: true,
+              message: 'Eintrag wirklich löschen?.',
+              color: 'info',
+              position: 'center',
+              icon: 'help_outline',
+              actions: [
+                {
+                  label: 'OK', color: 'black', handler: () => {
+
+                    //OK - löschen
+                    myURL = window.origin + "/admin/delete/" + this.table_field + "/" + this.selected[0].id
+                    var xmlHttp = new XMLHttpRequest();
+                    xmlHttp.open("POST", myURL, false);
+                    xmlHttp.setRequestHeader("Content-Type", "application/json");
+                    xmlHttp.onreadystatechange = function () {
+                      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+                        var json = JSON.parse(xmlHttp.responseText);
+                        console.log(json);
+
+                        me.onSearch()
+
+                      } else {
+
+                        me.$q.notify({
+                          message: 'Fehler beim Löschen:' + xmlHttp.status.toString() + ":" + xmlHttp.statusText,
+                          color: 'negative',
+                          icon: 'warning'
+                        });
+                      }
+                    };
+
+                    xmlHttp.send('');
+                  }
+                },
+                { label: 'Cancle', color: 'black', handler: () => { /* ... */ } }
+              ]
+            });
+            return;
+          }
+
+          me.$q.notify({
+            message: 'Funktion "Delete" hier nicht unterstützt.',
+            color: 'negative',
+            icon: 'warning'
+          });
+        },
+
+        onSave(iTable) {
+          if (iTable == 'user') {
+
+            if (this.userData.username == "") {
+              me.$q.notify({
+                message: 'Es muss mindestens "Username" gefüllt werden.',
+                color: 'negative',
+                icon: 'warning'
+              });
+              return;
+
+            } else if ((!this.userData.id)
+              && (!this.userData.newPassword
+                || !this.userData.valNewPassword || this.userData.newPassword != this.userData.valNewPassword)) {
+              me.$q.notify({
+                message: 'Es müssen mindestens "New Password" und "Validation" identisch gefüllt werden.',
+                color: 'negative',
+                icon: 'warning'
+              });
+              return;
+
+            } else {
+
+              this.dialogUser = this.setDataToApi("user?", JSON.stringify(this.userData));
+              this.onSearch()
+              return;
+            }
+          }
+
+          this.$q.notify({
+            message: 'Funktion "Save" hier nicht unterstützt.',
             color: 'negative',
             icon: 'warning'
           });

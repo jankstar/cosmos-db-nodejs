@@ -66,6 +66,22 @@ router.post('/login',
   //check
   async (req, res, next) => {
 
+    try {
+      if (!req.body.username && req.headers.authorization) {
+        var splitstring = req.headers.authorization.split(' ');
+        if (splitstring && splitstring.length == 2 && splitstring[0] == 'Basic' && splitstring[1]) {
+          var userPasswd = Buffer.from(splitstring[1], 'base64').toString('utf-8');
+          var splitUserPasswd = userPasswd.split(':');
+          if (splitUserPasswd && splitUserPasswd.length == 2) {
+            req.body.username = splitUserPasswd[0];
+            req.body.password = splitUserPasswd[1];
+          }
+        }
+      }
+    } catch (err) {
+
+    }
+
     const ipAddr = req.ip;
     const usernameIPkey = getUsernameIPkey(req.body.username, ipAddr);
 
