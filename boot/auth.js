@@ -19,8 +19,8 @@ module.exports = function () {
     async function (username, password, cb) {
       try {
         const { resource: row } = await db.User.item(username, username).read();
-        //  .query(`SELECT * FROM c WHERE c.username = '${username}' `)
-        //  .fetchAll();
+          //.query(`SELECT * FROM c WHERE c.username = '${username}' `)
+          //.fetchAll();
         if (!row) { return cb(null, false, { message: 'Incorrect username or password.' }); }
 
         var salt = Buffer.from(JSON.parse(row.salt));

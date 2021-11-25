@@ -1,8 +1,10 @@
-var express = require('express');
-var avatarePath = require("path").join(__dirname, "../static/avatare");
-var fs = require("fs");
-var crypto = require('crypto');
-var db = require('../src/db');
+const express = require('express');
+const avatarePath = require("path").join(__dirname, "../static/avatare");
+const fs = require("fs");
+const crypto = require('crypto');
+const { graphqlHTTP } = require('express-graphql');
+const apiRouter = require('../src/api');
+const db = require('../src/db');
 const { TITLE } = require('../config.js');
 
 var router = express.Router();
@@ -168,5 +170,10 @@ router.post('/data/:table',
         }
     });
 
+router.use('/api',
+    graphqlHTTP({
+        schema: apiRouter.schema,
+        graphiql: true,
+    }));
 
 module.exports = router;

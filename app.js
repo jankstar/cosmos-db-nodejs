@@ -7,12 +7,15 @@ var logger = require('morgan');
 var { v4: uuidv4 } = require('uuid');
 const ejs = require('ejs')
 const favicon = require('serve-favicon');
-var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
+const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 
 var indexRouter = require('./routes/index');
 var authRouter = require('./routes/auth');
 var privateRouter = require('./routes/private');
 var adminRouter = require('./routes/admin');
+
+//const db = require('./src/db')
+
 const { TITLE, COOKIENAME } = require('./config.js');
 
 var app = express();
