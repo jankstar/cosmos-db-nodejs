@@ -1,4 +1,4 @@
-# cosmos_db
+# cosmos-db-nodejs
 A simple example of user management in Azure Cosmos-DB on a node.js server with passport.js as well as client via vue 3.
 
 A cosmos db is used, the access is done with the "@azure/cosmos" driver and the access tokens of the Azure cloud.
