@@ -21,3 +21,12 @@ A container "user" is needed, with the fields
     "ip": "::1",
 }
 ```
+The parameter mapping of ejs was changed because of VUE to
+``` 
+ejs.openDelimiter = "'<";
+ejs.closeDelimiter = ">'";
+```
+so that the following placeholders for e.g. a varibale "message" are to be defined in the client coding:
+```
+messages: "'<%= message %>'"
+```
