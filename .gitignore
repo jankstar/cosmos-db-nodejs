@@ -6,3 +6,5 @@
 /static/avatare
 launch.json
 .vscode
+.deployment
+settings.json
